@@ -1,18 +1,21 @@
-const args = process.argv.slice(2);
 const request = require('request');
 
-request(` https://api.thecatapi.com/v1/breeds/search?q=${args}`, (error, response, body) => {
+const fetchBreedDescription = (breedName, callback) => {
 
-  if (JSON.parse(body).length === 0) {
-    console.log('MREOWER: that aint a real cat!!');
-  } else if (error === 'ENOTFOUND') {
-    console.log('MREOWER: u have a (smol) meowstake in your URL!!');
-  } else if (response === undefined || response === 'undefined:1') {
-    console.log('MREOWER: PLWESASE USE A VALID URL!!!');
-  } else if (error === SyntaxError) {
-    console.log('MREOWER: CHECK UR SPELLING!!!');
-  } else {
+  request(`https://api.thecatapi.com/v1/breeds/search?q=${breedName}`, (error, response, body) => {
+
+    if (error) {
+      return callback(error, null);
+    }
     const data = JSON.parse(body);
-    console.log(data[0].description);
-  }
-});
+    const validData = data[0];
+
+    if (validData) {
+      callback(null, data[0].description);
+    } else {
+      callback('breed not found', null);
+    }
+  });
+};
+
+module.exports = { fetchBreedDescription };
